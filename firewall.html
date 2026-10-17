@@ -1,1 +1,109 @@
 
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Firewall Simulator</title>
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;background:#050b10;color:#00ff99;
+  font-family:Consolas,monospace;padding:25px
+}
+h1{text-align:center;text-shadow:0 0 15px #00ff99}
+.panel{
+  max-width:750px;margin:25px auto;padding:22px;
+  border:1px solid #00ff99;background:#07130f;
+  box-shadow:0 0 20px #00ff9922
+}
+.status{font-size:20px;margin:15px 0}
+.bar{height:18px;background:#18251f;margin:12px 0}
+#fill{height:100%;width:0%;background:#00ff99;transition:.2s}
+button{
+  background:#07130f;color:#00ff99;border:1px solid;
+  padding:12px;margin:5px;cursor:pointer;font-family:inherit
+}
+button:hover{background:#00ff99;color:#000}
+#log{height:220px;overflow:auto;color:#8affc7;
+  border-top:1px solid #245c43;padding-top:10px}
+.red{color:#ff4545}
+</style>
+</head>
+<body>
+<h1>⚡ FIREWALL SIMULATOR</h1>
+<div class="panel">
+  <div class="status">STATUS: <b id="status">PROTECTED</b></div>
+  <div>Simulated load: <span id="num">0</span>%</div>
+  <div class="bar"><div id="fill"></div></div>
+  <button onclick="start()">▶ ATTACK SIMULATION</button>
+  <button onclick="stop()">■ STOP</button>
+  <button onclick="reset()">↻ RESET</button>
+  <h3>EVENT LOG</h3>
+  <div id="log">[SYSTEM] Firewall initialized.<br>
+  [SYSTEM] All systems operational.</div>
+</div>
+<script>
+let load=0, timer=null, running=false;
+
+function log(msg){
+  const el=document.getElementById('log');
+  el.innerHTML += '<br>['+
+    new Date().toLocaleTimeString()+'] '+msg;
+  el.scrollTop=el.scrollHeight;
+}
+
+function update(){
+  document.getElementById('num').textContent=load;
+  document.getElementById('fill').style.width=load+'%';
+  const s=document.getElementById('status');
+
+  if(load>=100){
+    s.textContent='SIMULATED FAILURE';
+    s.className='red';
+    document.getElementById('fill').style.background='#ff4545';
+  }else if(load>=70){
+    s.textContent='OVERLOADED';
+    s.className='red';
+  }else{
+    s.textContent='PROTECTED';
+    s.className='';
+    document.getElementById('fill').style.background='#00ff99';
+  }
+}
+
+function start(){
+  if(running)return;
+  running=true;
+  log('[SIM] Starting local load simulation...');
+  timer=setInterval(()=>{
+    load=Math.min(100,load+Math.floor(Math.random()*12+5));
+    update();
+    if(load>=100){
+      clearInterval(timer);
+      timer=null;
+      running=false;
+      log('[SIM] Firewall failure simulated.');
+      log('[INFO] No real system was attacked.');
+    }
+  },500);
+}
+
+function stop(){
+  clearInterval(timer);
+  timer=null;
+  running=false;
+  log('[INFO] Simulation stopped.');
+}
+
+function reset(){
+  stop();
+  load=0;
+  update();
+  document.getElementById('log').innerHTML=
+    '[SYSTEM] Simulator reset.<br>';
+}
+</script>
+</body>
+</html>
+
